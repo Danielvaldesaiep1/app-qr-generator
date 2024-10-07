@@ -2,23 +2,18 @@ from flask import Flask, render_template, request, jsonify
 import qrcode
 import io
 import base64
-import sqlite3
+import mysql.connector  # Cambiado para usar MySQL
 
 app = Flask(__name__)
 
-# Función para inicializar la base de datos y crear la tabla
-def init_db():
-    conn = sqlite3.connect('qr_code.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS info_codigo (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data TEXT,
-            image BLOB
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# Función para inicializar la conexión con la base de datos MySQL
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",      # Cambia por la dirección de tu servidor MySQL
+        user="root",      # Cambia por tu usuario de MySQL
+        password="",  # Cambia por tu contraseña de MySQL
+        database="qr_code"   # Cambia por el nombre de tu base de datos
+    )
 
 @app.route('/')
 def index():
@@ -26,7 +21,7 @@ def index():
 
 @app.route('/generate_qr', methods=['POST'])
 def generate_qr():
-    data = request.json['data']  # Obtener el url especificada desde la solicitud
+    data = request.json['data']  # Obtener el dato enviado desde la solicitud
     
     # Generar código QR
     qr_img = qrcode.make(data)
@@ -39,25 +34,34 @@ def generate_qr():
     # Convertir la imagen a binarios para guardarla en la base de datos
     img_binary = img_io.getvalue()
     
-    # Guardar los datos en la base de datos
-    conn = sqlite3.connect('qr_code.db') 
+    # Guardar los datos en la base de datos MySQL
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("INSERT INTO info_codigo (data, image) VALUES (?, ?)", (data, img_binary))
-    conn.commit()
-    conn.close()
+    
+    try:
+        c.execute("INSERT INTO info_codigo (data, image) VALUES (%s, %s)", (data, img_binary))
+        conn.commit()
+        qr_id = c.lastrowid  # Obtener el último ID insertado
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({'error': str(err)}), 500
+    finally:
+        c.close()
+        conn.close()
     
     # Convertir la imagen a base64 para enviarla al frontend
     img_base64 = base64.b64encode(img_binary).decode('ascii')
     
-    return jsonify({'img': img_base64})
+    return jsonify({'img': img_base64, 'id': qr_id})
 
 # Ruta para mostrar el código QR desde la base de datos
 @app.route('/qr/<int:id>', methods=['GET'])
 def get_qr(id):
-    conn = sqlite3.connect('qr_code.db')
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT image FROM info_codigo WHERE id=?", (id,))
+    c.execute("SELECT image FROM info_codigo WHERE id=%s", (id,))
     qr_image = c.fetchone()
+    c.close()
     conn.close()
 
     if qr_image:
@@ -69,5 +73,4 @@ def get_qr(id):
         return "QR Code not found", 404
 
 if __name__ == "__main__":
-    init_db()  # Inicializa la base de datos al iniciar la aplicación
     app.run(debug=True)
