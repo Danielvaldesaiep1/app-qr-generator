@@ -1,10 +1,10 @@
 body {
-    background-color: #f4f4f4;
+  background-color: #202b38;
 }
 
 #qrResult img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
