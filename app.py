@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import qrcode
 import io
 import base64
+from datetime import datetime
 import mysql.connector  # Cambiado para usar MySQL
 
 app = Flask(__name__)
@@ -22,6 +23,7 @@ def index():
 @app.route('/generate_qr', methods=['POST'])
 def generate_qr():
     data = request.json['data']  # Obtener el dato enviado desde la solicitud
+    name = request.json['name']  
     
     # Generar código QR
     qr_img = qrcode.make(data)
@@ -33,13 +35,15 @@ def generate_qr():
     
     # Convertir la imagen a binarios para guardarla en la base de datos
     img_binary = img_io.getvalue()
+
+    fecha_creacion = datetime.now()
     
     # Guardar los datos en la base de datos MySQL
     conn = get_db_connection()
     c = conn.cursor()
     
     try:
-        c.execute("INSERT INTO info_codigo (data, image) VALUES (%s, %s)", (data, img_binary))
+        c.execute("INSERT INTO info_codigo (data, image, fecha_creacion, nombre_qr) VALUES (%s, %s, %s,%s)", (data, img_binary,fecha_creacion,name))
         conn.commit()
         qr_id = c.lastrowid  # Obtener el último ID insertado
     except mysql.connector.Error as err:

@@ -1,4 +1,5 @@
 document.getElementById('generateBtn').addEventListener('click', function() {
+    const qrName = document.getElementById('qrName').value;
     const qrText = document.getElementById('qrText').value;
 
     if (!qrText) {
@@ -11,7 +12,7 @@ document.getElementById('generateBtn').addEventListener('click', function() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ data: qrText })
+        body: JSON.stringify({ data: qrText, name: qrName })
     })
     .then(response => response.json())
     .then(data => {
