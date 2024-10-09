@@ -23,7 +23,9 @@ def index():
 @app.route('/generate_qr', methods=['POST'])
 def generate_qr():
     data = request.json['data']  # Obtener el dato enviado desde la solicitud
-    name = request.json['name']  
+    name = request.json['name']  # Obtener el dato enviado desde la solicitud
+    fecha_creacion = datetime.now()
+    
     
     # Generar código QR
     qr_img = qrcode.make(data)
@@ -35,15 +37,13 @@ def generate_qr():
     
     # Convertir la imagen a binarios para guardarla en la base de datos
     img_binary = img_io.getvalue()
-
-    fecha_creacion = datetime.now()
     
     # Guardar los datos en la base de datos MySQL
     conn = get_db_connection()
     c = conn.cursor()
     
     try:
-        c.execute("INSERT INTO info_codigo (data, image, fecha_creacion, nombre_qr) VALUES (%s, %s, %s,%s)", (data, img_binary,fecha_creacion,name))
+        c.execute("INSERT INTO info_codigo (data, image, fecha_creacion,nombre_qr) VALUES (%s, %s, %s, %s)", (data, img_binary, fecha_creacion,name))
         conn.commit()
         qr_id = c.lastrowid  # Obtener el último ID insertado
     except mysql.connector.Error as err:
@@ -57,6 +57,34 @@ def generate_qr():
     img_base64 = base64.b64encode(img_binary).decode('ascii')
     
     return jsonify({'img': img_base64, 'id': qr_id})
+
+
+
+@app.route('/mis_qr')
+def mis_qr():
+    return personal_qr()
+
+#Ruta para mostrar codigos qr 
+@app.route('/personal_qr')
+def personal_qr():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        cursor.execute("SELECT id,nombre_qr, data, fecha_creacion FROM info_codigo ")
+        qr_codes = cursor.fetchall()
+        return render_template('personal_qr.html', qr_codes=qr_codes)
+    except mysql.connector.Error as err:
+        return render_template('personal_qr.html', error=str(err))
+    finally:
+        cursor.close()
+        conn.close()
+
+#Route para que muestre informacion de qr seleccionado en personal_qr
+
+
+
+    
 
 # Ruta para mostrar el código QR desde la base de datos
 @app.route('/qr/<int:id>', methods=['GET'])
@@ -75,6 +103,9 @@ def get_qr(id):
         return f'<img src="data:image/png;base64,{img_base64}" alt="QR Code">'
     else:
         return "QR Code not found", 404
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

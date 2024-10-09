@@ -6,6 +6,10 @@ document.getElementById('generateBtn').addEventListener('click', function() {
         alert('Por favor, introduce algún texto o URL.');
         return;
     }
+    if (!qrName) {
+        alert('Por favor, introduce algún nombre para tu codigo QR.');
+        return;
+    }
 
     fetch('/generate_qr', {
         method: 'POST',

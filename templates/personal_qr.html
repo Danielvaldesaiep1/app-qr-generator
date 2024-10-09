@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Códigos QR</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Mis Códigos QR</h1>
+        
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% else %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>URL</th>
+                        <th>Fecha Creación</th>
+                        <th>Actualizar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qr in qr_codes %}
+                        <tr>
+                            <td>{{ qr.id }}</td>
+                            <td>{{ qr.nombre_qr }}</td>
+                            <td>{{ qr.data }}</td>
+                            <td>{{ qr.fecha_creacion }}</td>
+                            <td>
+                                <button class="btn btn-success SelectForUpdateBtn" data-id="{{ qr.id }}">Actualizar</button>
+                            </td>
+                            <td><button class="btn btn-danger">Eliminar</button></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</body>
+</html>
