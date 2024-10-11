@@ -18,6 +18,7 @@
                 <input type="text" class="form-control mb-3" id="qrText" placeholder="Introduce el texto o URL">
                 <!-- Botón de generar QR -->
                 <button class="btn btn-success btn-lg btn-block" id="generateBtn">Generar QR</button>
+                <a href="{{ url_for('personal_qr') }}" class="btn btn-success btn-lg btn-block">Ver mi codigos qr</a>
                 <!-- Resultado del código QR -->
                 <div id="qrResult" class="mt-4">
                     <img id="qrImage" alt="Tu Código QR aparecerá aquí" class="img-fluid">

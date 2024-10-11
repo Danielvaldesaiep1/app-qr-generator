@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Código QR</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Actualizar Código QR</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <form action="{{ url_for('guardar_actualizacion_qr', qr_id=qr.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="nombre_qr">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre_qr" name="nombre_qr" value="{{ qr.nombre_qr }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data">URL:</label>
+                        <input type="url" class="form-control" id="data" name="data" value="{{ qr.data }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    <a href="{{ url_for('personal_qr') }}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h4>Imagen actual del código QR:</h4>
+                {% if qr.image %}
+                    <img src="data:image/png;base64,{{ qr.image }}" alt="QR Code" class="img-fluid">
+                {% else %}
+                    <p>No hay imagen disponible para este código QR.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

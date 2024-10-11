@@ -7,6 +7,13 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
     <div class="container mt-5">
         <h1 class="text-center mb-4">Mis Códigos QR</h1>
         
@@ -34,7 +41,7 @@
                             <td>{{ qr.data }}</td>
                             <td>{{ qr.fecha_creacion }}</td>
                             <td>
-                                <button class="btn btn-success SelectForUpdateBtn" data-id="{{ qr.id }}">Actualizar</button>
+                                <a href="{{ url_for('update_selected_qr', qr_id=qr.id) }}" class="btn btn-success">Actualizar</a>
                             </td>
                             <td><button class="btn btn-danger">Eliminar</button></td>
                         </tr>
@@ -43,5 +50,6 @@
             </table>
         {% endif %}
     </div>
+   
 </body>
 </html>

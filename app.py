@@ -1,11 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for, redirect, flash, session
+import os
 import qrcode
 import io
 import base64
 from datetime import datetime
+from database import get_qr_by_id , update_qr,get_db_connection
 import mysql.connector  # Cambiado para usar MySQL
 
+
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+# app.secret_key = 'tu_clave_secreta_aqui'  # Reemplaza con una clave segura y única
 
 # Función para inicializar la conexión con la base de datos MySQL
 def get_db_connection():
@@ -80,7 +86,34 @@ def personal_qr():
         cursor.close()
         conn.close()
 
-#Route para que muestre informacion de qr seleccionado en personal_qr
+
+
+
+    
+@app.route('/update_selected_qr/<int:qr_id>')
+def update_selected_qr(qr_id):
+    qr = get_qr_by_id(qr_id)
+    if qr:
+        # Si 'image' no está en qr, establece un valor predeterminado
+        if 'image' not in qr:
+            qr['image'] = None
+        return render_template('update_selected_qr.html', qr=qr)
+    else:
+        flash('Codigo QR no existe', 'error')
+        return redirect(url_for('personal_qr'))
+
+@app.route('/guardar_actualizacion_qr/<int:qr_id>', methods=['POST'])
+def guardar_actualizacion_qr(qr_id):
+    nombre_qr = request.form['nombre_qr']
+    data = request.form['data']
+    if update_qr(qr_id, nombre_qr, data):
+        flash('Codigo QR actualizado correctamente', 'success')
+        return redirect(url_for('personal_qr'))
+    else:
+        flash('Error al actualizar codigo QR', 'error')
+        return redirect(url_for('update_selected_qr', qr_id=qr_id))
+
+
 
 
 
