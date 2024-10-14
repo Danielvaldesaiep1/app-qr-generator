@@ -5,15 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Códigos QR</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+        .modal-footer .btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .modal-footer .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="container mt-5">
         <h1 class="text-center mb-4">Mis Códigos QR</h1>
         
@@ -43,13 +58,55 @@
                             <td>
                                 <a href="{{ url_for('update_selected_qr', qr_id=qr.id) }}" class="btn btn-success">Actualizar</a>
                             </td>
-                            <td><button class="btn btn-danger">Eliminar</button></td>
+                            <td>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#myModal" data-id="{{ qr.id }}">
+                                    Eliminar
+                                </button>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% endif %}
     </div>
-   
+
+ <!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Eliminar QR</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar el código QR seleccionado?
+            </div>
+            <div class="modal-footer">
+                <form method="POST" action="/delete_qr" id="deleteForm">
+                    <input type="hidden" name="qr_id" id="qr_id" value="">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar QR</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $('#myModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Botón que activó el modal
+    var qrId = button.data('id'); // Extraer el ID del código QR
+    var modal = $(this);
+    modal.find('#qr_id').val(qrId); // Pasar el ID al campo oculto del formulario
+});
+    </script>
 </body>
 </html>

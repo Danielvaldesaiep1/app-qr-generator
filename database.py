@@ -49,9 +49,32 @@ def update_qr(qr_id, nombre_qr, data):
         connection.commit()
         return True
     except Error as e:
-        print(f"Error updating QR code: {e}")
+        print(f"Error actualizar Codigo QR: {e}")
         return False
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
+
+def delete_qr(qr_id):
+    connection = get_db_connection()
+    if connection is None:
+        return False
+    
+    try:
+        cursor = connection.cursor()
+        # Corregir la consulta SQL eliminando el * y usando la tabla y el id correctos
+        query = "DELETE FROM info_codigo WHERE id = %s"
+        cursor.execute(query, (qr_id,))  # Asegurarse de pasar qr_id como tupla
+        connection.commit()
+        return True
+    except Exception as e:
+        print(f"Error al eliminar el Código QR: {e}")
+        connection.rollback()  # Realiza un rollback si hay error
+        return False
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+

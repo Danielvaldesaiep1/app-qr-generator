@@ -4,7 +4,7 @@ import qrcode
 import io
 import base64
 from datetime import datetime
-from database import get_qr_by_id , update_qr,get_db_connection
+from database import get_qr_by_id , update_qr,get_db_connection,delete_qr
 import mysql.connector  # Cambiado para usar MySQL
 
 
@@ -99,7 +99,7 @@ def update_selected_qr(qr_id):
             qr['image'] = None
         return render_template('update_selected_qr.html', qr=qr)
     else:
-        flash('Codigo QR no existe', 'error')
+        flash('Codigo QR no actualizado', 'error')
         return redirect(url_for('personal_qr'))
 
 @app.route('/guardar_actualizacion_qr/<int:qr_id>', methods=['POST'])
@@ -112,7 +112,19 @@ def guardar_actualizacion_qr(qr_id):
     else:
         flash('Error al actualizar codigo QR', 'error')
         return redirect(url_for('update_selected_qr', qr_id=qr_id))
+    
+@app.route('/delete_qr', methods=['POST'])
+def delete_qr_route():
+    qr_id = request.form.get('qr_id')
+    if qr_id:
+        if delete_qr(qr_id):  # Supongo que ya tienes la función `delete_qr`
+            flash('Código QR eliminado correctamente', 'success')
+        else:
+            flash('Error al eliminar el Código QR', 'danger')
+    else:
+        flash('No se recibió el ID del código QR', 'danger')
 
+    return redirect(url_for('personal_qr'))  # Asegúrate de tener esta ruta definida
 
 
 
